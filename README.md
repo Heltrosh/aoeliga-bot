@@ -1,1 +1,1 @@
-Faked readme
+Fake readme
