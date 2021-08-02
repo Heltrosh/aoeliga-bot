@@ -26,6 +26,7 @@ def getDelayers(round):
   for match in challonge.matches.index(tournament["id"]):
    if match["round"] == round and match["state"] == "open":
      retard = challonge.participants.show(tournament["id"], match["player2_id"])
+     print('foundRetardNameFromChall:' + retard["name"])
      return retard["name"]
 
 client = commands.Bot(command_prefix = '!')
