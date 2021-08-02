@@ -1,4 +1,5 @@
 import discord
+from discord.client import Client
 from discord.ext import commands
 import os
 import challonge
@@ -35,5 +36,11 @@ async def delayerlist(ctx, round):
   delayerName = getDelayers(round)
   discordName = getDiscordName(delayerName)
   await ctx.send(discordName)
+
+@client.command()
+async def userlist(ctx):
+  users = Client.users()
+  for user in users:
+    print(getattr(user,'name')
 
 client.run(os.getenv("DISCORD_TOKEN"))
