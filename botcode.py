@@ -6,6 +6,7 @@ import psycopg2
 
 def getDiscordName(challongename):
   i=0
+  discordname=""
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
   cursor.execute("SELECT DISCORD FROM USERS WHERE CHALLONGE= %s",[challongename])
