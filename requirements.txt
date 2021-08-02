@@ -1,3 +1,4 @@
 discord.py
 python.env
 pychallonge
+psycopg2-binary
