@@ -5,19 +5,22 @@ import challonge
 import psycopg2
 
 def getDiscordName(challongename):
+  print('Cnameinserted:' + challongename)
   i=0
-  discordname=""
+  discordName=""
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
   cursor.execute("SELECT DISCORD FROM USERS WHERE CHALLONGE= %s",[challongename])
   rows = cursor.fetchall()
   for row in rows:
-    discordname = row[0]
+    discordName = row[0]
+  print('Dnameret:' + discordName)
   cursor.close()
   conn.close()
-  return discordname
+  return discordName
 
 def getDelayers(round):
+  print('roundinserted:' + round)
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
   tournament = challonge.tournaments.show(10110170)
   for match in challonge.matches.index(tournament["id"]):
@@ -33,7 +36,9 @@ async def on_ready():
 @client.command()
 async def delayerlist(ctx, round):
   delayerName = getDelayers(round)
+  print(delayerName)
   discordName = getDiscordName(delayerName)
+  print(discordName)
   await ctx.send(discordName)
 
 client.run(os.getenv("DISCORD_TOKEN"))
