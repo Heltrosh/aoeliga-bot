@@ -1,4 +1,5 @@
 import discord
+import os
 from discord.ext import commands
 
 client = commands.Bot(command_prefix = '!')
@@ -7,4 +8,4 @@ client = commands.Bot(command_prefix = '!')
 async def on_ready():
     print('Bot is ready.')
 
-client.run('ODcxNDU3ODMwMjExODQyMTA4.YQbmWQ.NlYHeaBTQ7j4ewMYY_zkYSFG8fg')
+client.run(os.getenv("DISCORD_TOKEN"))
