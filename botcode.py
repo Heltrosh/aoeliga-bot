@@ -36,9 +36,9 @@ async def on_ready():
 @client.command()
 async def delayerlist(ctx, round):
   delayerName = getDelayers(round)
-  print(delayerName)
+  print('delayerNamereturned:' + delayerName)
   discordName = getDiscordName(delayerName)
-  print(discordName)
+  print('roundInsertedreturned:' + discordName)
   await ctx.send(discordName)
 
 client.run(os.getenv("DISCORD_TOKEN"))
