@@ -21,7 +21,10 @@ def getDelayers(round):
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
   tournament = challonge.tournaments.show(10110170)
   for match in challonge.matches.index(tournament["id"]):
-    print('prvnitype:' + type(match["round"]) + ' druhytype:' + type(round))
+    print("prvnitype")
+    print(type(match["round"])) 
+    print("druhytype")
+    print(type(round))
     if match["round"] == 1 and match["state"] == "open":
       retard = challonge.participants.show(tournament["id"], match["player2_id"])
       return retard["name"]
