@@ -5,7 +5,6 @@ import challonge
 import psycopg2
 
 def getDiscordName(challongename):
-  print('Cnameinserted:' + challongename)
   i=0
   discordName=""
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
@@ -14,20 +13,17 @@ def getDiscordName(challongename):
   rows = cursor.fetchall()
   for row in rows:
     discordName = row[0]
-  print('Dnameret:' + discordName)
   cursor.close()
   conn.close()
   return discordName
 
 def getDelayers(round):
-  print('roundinserted:' + round)
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
   tournament = challonge.tournaments.show(10110170)
   for match in challonge.matches.index(tournament["id"]):
-    print('round:' + str(match["round"]) + ' state' + match["state"])
+    print('prvnitype:' + type(match["round"]) + ' druhytype:' + type(round))
     if match["round"] == 1 and match["state"] == "open":
       retard = challonge.participants.show(tournament["id"], match["player2_id"])
-      print('foundRetardNameFromChall:' + retard["name"])
       return retard["name"]
 
 client = commands.Bot(command_prefix = '!')
@@ -38,9 +34,7 @@ async def on_ready():
 @client.command()
 async def delayerlist(ctx, round):
   delayerName = getDelayers(round)
-  print('delayerNamereturned:' + delayerName)
   discordName = getDiscordName(delayerName)
-  print('roundInsertedreturned:' + discordName)
   await ctx.send(discordName)
 
 client.run(os.getenv("DISCORD_TOKEN"))
