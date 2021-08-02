@@ -41,6 +41,6 @@ async def delayerlist(ctx, round):
 async def userlist(ctx):
   users = Client.users()
   for user in users:
-    print(getattr(user,'name')
+    print(getattr(user,'name'))
 
 client.run(os.getenv("DISCORD_TOKEN"))
