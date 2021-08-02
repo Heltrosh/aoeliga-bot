@@ -1,4 +1,0 @@
-Bot: Challonge API connection, buzerování lidí kdo neodehraje, bot checkne odehrati a napíše
-
-Bot2: Point/level system, economy bot (voice, text points), !bet, algoritmus, coaching u high elo za body,
-komentování matche za body, steam keys za body

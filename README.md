@@ -1,1 +1,1 @@
-Fake readme
+Discord Bot made for AoELiga by Heltrosh
