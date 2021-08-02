@@ -37,10 +37,5 @@ async def delayerlist(ctx, round):
   discordName = getDiscordName(delayerName)
   await ctx.send(discordName)
 
-@client.command()
-async def userlist(ctx):
-  users = Client.users()
-  for user in users:
-    print(getattr(user,'name'))
 
 client.run(os.getenv("DISCORD_TOKEN"))
