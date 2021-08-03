@@ -38,19 +38,35 @@ def main():
 
   @bot.command()
   async def pinground(ctx, round):
-    i=0
-    lazies = getDelayers(round)
-    for lazy in lazies:
-      discordID = getDiscordID(lazy)
-      user = await bot.fetch_user(discordID)
-      await user.send('Lenochu')
-      i+=1
-    await ctx.send('Poslal jsem ' + str(i) + ' zpráv.')
+    if not ctx.author.guild_permissions.administrator:
+      await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
+    else:
+      i=0
+      lazies = getDelayers(round)
+      ignorants = []
+      for lazy in lazies:
+        discordID = getDiscordID(lazy)
+        user = await bot.fetch_user(discordID) 
+        while True:
+          try:
+            await user.send('Lenochu')
+            i+=1
+            break
+          except discord.Forbidden:
+            ignorants.append(lazy)
+            break
+      if ignorants:
+        ignorantstr = "Zprávu jsem nedoručil: "
+        for ignorant in ignorants:
+          ignorantstr += (ignorant + ' ') 
+        await ctx.send(ignorantstr)
+      await ctx.send('Poslal jsem ' + str(i) + ' zpráv.')
+    
   bot.run(os.getenv("DISCORD_TOKEN"))
 
 if __name__ == "__main__":
     main()
 
-# IMPORTANT TO DO:  Only administrator can issue commands
+# IMPORTANT TO DO:  EXCEPTIONS / Checks on db
 #                   Prepare for multiple tournaments
 #                   Think deadlines through (different league systems?)
