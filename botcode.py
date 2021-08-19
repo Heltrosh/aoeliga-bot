@@ -8,7 +8,7 @@ import challonge
 import psycopg2
 
 
-def getRows():
+def getPlayers():
   i=0
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
@@ -110,10 +110,12 @@ def main():
   async def pinground(ctx, round, league):
     if not ctx.author.guild_permissions.administrator:
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
+    elif not round.isnumeric() or not league.isnumeric() or not (1 <= int(round) <= 9 ) or (1 <= int(round) <= 5):
+      await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 a liga musí být celé číslo v intervalu 1-5 ')
     else:
       i=0
       lazies = getDelayers(round, (int(league)-1))
-      dbRows = getRows()
+      dbRows = getPlayers()
       ignorants = []
       notFound = []
       excusedList = []
@@ -175,7 +177,7 @@ def main():
     else:
       if args[0] == 'list':
         excuseListOutput = ''
-        dbRows = getRows()
+        dbRows = getPlayers()
         for row in dbRows:
           if row[2]:
             rounds = ', '.join([str(round) for round in row[2]])
@@ -183,7 +185,7 @@ def main():
         if excuseListOutput:
           await ctx.send(excuseListOutput)
       elif len(args) == 1:
-        dbRows = getRows()
+        dbRows = getPlayers()
         for row in dbRows:
           if row[0] == args[0]:
             if row[2]:
@@ -198,6 +200,8 @@ def main():
         for arg in args[1:]:
           if not arg.isnumeric():
             await ctx.send('Kola nebyla správně zadaná, použij !help excuse pro správnou syntax.')
+          elif arg.isnumeric() and int(arg) > 9:
+            await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 9.')
         resultRounds = processExcuse(args[0], args[1:])
         if not resultRounds:
           await ctx.send('Nenalezl jsem hráče ' + args[0] + ' v databázi.')
@@ -226,6 +230,5 @@ def main():
 if __name__ == "__main__":
     main()
 
-# IMPORTANT TO DO:  1) Add deadlines
-#                   2) Help command stuff
-#                   3) Sanitize input data !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# IMPORTANT TO DO:  1) Help command stuff
+#                   2) Dmall rates
