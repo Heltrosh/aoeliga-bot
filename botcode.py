@@ -25,8 +25,12 @@ def getDelayers(round, leagueid):
   tournaments = [challonge.tournaments.show(10110170)]
   for match in challonge.matches.index(tournaments[leagueid]["id"]):
     if match["round"] == int(round) and match["state"] == "open":
-      lazies.append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["name"])
-      lazies.append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["name"])
+      lazies.append([])
+      lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["name"])
+      lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["name"])
+      lazies.append([])
+      lazies[-1].append(lazies[-2][1])
+      lazies[-1].append(lazies[-2][0])
   return lazies
 
 def processExcuse(challonge, rounds):
@@ -59,19 +63,26 @@ def checkExcused(round, excuses):
       return True
   return False
 
-def getPingMessage(discordName, round):
+def getPingMessage(discordName, round, opponent, league):
   conn = conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
   cursor.execute("SELECT DEADLINE FROM DEADLINES WHERE ROUND = %s", [round])
   row = cursor.fetchone()
+  deadline = row[0]
+  cursor.execute("SELECT DISCORDNAME FROM EXCUSETEST WHERE CHALLONGE = %s", [opponent])
+  row = cursor.fetchone()
+  opponentDiscord = row[0] 
+  cursor.execute("SELECT LINK, CHANNEL FROM BRACKETLINKS WHERE LEAGUE = %s", [league])
+  row = cursor.fetchone()
+  bracketURL = row[0]
+  discordChannel = row[1]
   cursor.close()
   conn.close()
-  deadline = row[0]
   messageStr = f"""Ahoj {discordName}, 
 píšeme ti, lebo nám chýba výsledok tvojho ligového zápasu:
   
 KOLO: {round}.
-PROTIVNÍK: [CHALLONGEACC, DISCORDACC PLACEHOLDER]
+PROTIVNÍK: {opponent}, {opponentDiscord}
 DEADLINE: {deadline}
 
 Po odohratí zápasu musí byť jeho výsledok nahlásený najneskôr do dátumu deadlinu.
@@ -80,8 +91,9 @@ Zápasy s nenahlásenými výsledkami sú automaticky kontumované Adminom.
   
 VÝSLEDOK SA NAHLASUJE NA DVOCH MIESTACH:
 1) AOEliga Discord Server
+<#{discordChannel}>
 2) **Challonge Bracket**
-[URL NA BRACKET PLACEHOLDER]"""
+<{bracketURL}>"""
   return messageStr
 
 def main():
@@ -106,7 +118,9 @@ def main():
       notFound = []
       excusedList = []
       excusedAmount = 0
-      for lazy in lazies:
+      for lazyList in lazies:
+        lazy = lazyList[0]
+        opponent = lazyList[1]
         discordID = 0
         found = False
         excused = False
@@ -125,7 +139,7 @@ def main():
             notFound.append(lazy)
             continue
           try:
-            pingMessage = getPingMessage(user.name, round)
+            pingMessage = getPingMessage(user.name, round, opponent, league)
             await user.send(pingMessage)
             i+=1
           except discord.Forbidden:
