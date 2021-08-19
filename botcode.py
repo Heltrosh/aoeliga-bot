@@ -64,6 +64,8 @@ def getPingMessage(discordName, round):
   cursor = conn.cursor()
   cursor.execute("SELECT DEADLINE FROM DEADLINES WHERE ROUND = %s", [round])
   row = cursor.fetchone()
+  cursor.close()
+  conn.close()
   deadline = row[0]
   messageStr = f"""Ahoj {discordName}, 
 píšeme ti, lebo nám chýba výsledok tvojho ligového zápasu:
@@ -79,7 +81,7 @@ Zápasy s nenahlásenými výsledkami sú automaticky kontumované Adminom.
 VÝSLEDOK SA NAHLASUJE NA DVOCH MIESTACH:
 1) AOEliga Discord Server
 2) **Challonge Bracket**
-[URL NA BRACKET PLACEHOLDER]""" 
+[URL NA BRACKET PLACEHOLDER]"""
   return messageStr
 
 def main():
