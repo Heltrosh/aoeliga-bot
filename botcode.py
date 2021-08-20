@@ -2,6 +2,7 @@ import asyncio
 from json import dump
 import discord
 from discord.ext import commands
+from discord.message import Attachment
 from dotenv.main import load_dotenv
 import os
 import challonge
@@ -21,16 +22,35 @@ def getPlayers():
 
 def getDelayers(round, leagueid):
   lazies = []
+  challRound = 0
+  if round < 8:
+    challRound = round
+  elif round == 8:
+    challRound = 1
+  else:
+    challRound = 2
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
-  tournaments = [challonge.tournaments.show(10110170)]
+  tournaments = [challonge.tournaments.show('HeltroshTest3')]
   for match in challonge.matches.index(tournaments[leagueid]["id"]):
-    if match["round"] == int(round) and match["state"] == "open":
-      lazies.append([])
-      lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["name"])
-      lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["name"])
-      lazies.append([])
-      lazies[-1].append(lazies[-2][1])
-      lazies[-1].append(lazies[-2][0])
+    if match["round"] == challRound and match["state"] == "open":
+      if round < 8: #group stage
+        for player in challonge.participants.index(tournaments[leagueid]["id"]):
+          if player["group_player_ids"][0] == match["player1_id"]:
+            lazies.append([])
+            lazies[-1].append(player["name"])
+            for opponent in challonge.participants.index(tournaments[leagueid]["id"]):
+              if opponent["group_player_ids"][0] == match["player2_id"]:
+                lazies[-1].append(opponent["name"])
+            lazies.append([])
+            lazies[-1].append(lazies[-2][1])
+            lazies[-1].append(lazies[-2][0])
+      else: #playoffs
+        lazies.append([])
+        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["name"])
+        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["name"])
+        lazies.append([])
+        lazies[-1].append(lazies[-2][1])
+        lazies[-1].append(lazies[-2][0])
   return lazies
 
 def processExcuse(challonge, rounds):
@@ -110,11 +130,11 @@ def main():
   async def pinground(ctx, round, league):
     if not ctx.author.guild_permissions.administrator:
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
-    elif not round.isnumeric() or not league.isnumeric() or not (1 <= int(round) <= 9 ) or (1 <= int(round) <= 5):
+    elif not round.isnumeric() or not league.isnumeric() or not (1 <= int(round) <= 9 ) or not (1 <= int(league) <= 5):
       await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 a liga musí být celé číslo v intervalu 1-5 ')
     else:
       i=0
-      lazies = getDelayers(round, (int(league)-1))
+      lazies = getDelayers(int(round), (int(league)-1))
       dbRows = getPlayers()
       ignorants = []
       notFound = []
@@ -208,7 +228,6 @@ def main():
         else:
           rounds = ', '.join([str(round) for round in resultRounds])
           await ctx.send('Nový seznam omluvených kol hráče ' + args[0] + ': ' + rounds + '.')
-
 
 
 #COG MANAGEMENT
