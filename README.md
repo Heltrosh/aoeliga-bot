@@ -19,7 +19,9 @@ First version of the command lists all players, who are excused from any round a
 
 Second version of the command checks if a given player is excused from any rounds and responds accordingly (says so if no, lists rounds if yes)
 
-Third version of the command excuses a player from given round(s) if he isn't yet excused from those and vice versa. Accepts multiple rounds, e.g. !excuse Heltrosh 1 4 8
+Third version of the command excuses a player from given round(s) if he isn't yet excused from those and vice versa. Accepts multiple rounds, e.g. !excuse Heltrosh 1 4 8 
+
+For names with a space in it, you have to use quotation marks (!excuse "Helt rosh")
 
 #### !load 
 Syntax: !load \<extension\>
