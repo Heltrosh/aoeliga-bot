@@ -96,7 +96,9 @@ def getPingMessage(discordName, round, opponent, league, isOpponentExcused):
   deadline = row[0]
   cursor.execute("SELECT DISCORDNAME FROM FINALTEST WHERE CHALLONGE = %s", [opponent])
   row = cursor.fetchone()
-  opponentDiscord = row[0] 
+  opponentDiscord = "ERROR, CONTACT HELTROSH"
+  if row[0]:
+    opponentDiscord = row[0] 
   cursor.execute("SELECT LINK, CHANNEL FROM BRACKETLINKS WHERE LEAGUE = %s", [league])
   row = cursor.fetchone()
   bracketURL = row[0]
