@@ -13,7 +13,7 @@ def getPlayers():
   i=0
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
-  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED FROM EXCUSETEST")
+  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED FROM FINALTEST")
   rows = cursor.fetchall()
   cursor.close()
   conn.close()
@@ -25,29 +25,32 @@ def getDelayers(round, leagueid):
   challRound = 0
   if round < 8:
     challRound = round
-  elif round == 8:
+  elif leagueid == 3 and round < 10:
+    challRound = round
+  elif round == 8 or round == 10:
     challRound = 1
   else:
     challRound = 2
+  
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
-  tournaments = [challonge.tournaments.show('HeltroshTest3')]
+  tournaments = [challonge.tournaments.show('3deg6sfm'), challonge.tournaments.show('6svp9be5'), challonge.tournaments.show('ldc7iv9i'), challonge.tournaments.show('wgmwco9o'), challonge.tournaments.show('szwgkw9x')]
   for match in challonge.matches.index(tournaments[leagueid]["id"]):
     if match["round"] == challRound and match["state"] == "open":
       if round < 8: #group stage
         for player in challonge.participants.index(tournaments[leagueid]["id"]):
           if player["group_player_ids"][0] == match["player1_id"]:
             lazies.append([])
-            lazies[-1].append(player["name"])
+            lazies[-1].append(player["challonge_username"])
             for opponent in challonge.participants.index(tournaments[leagueid]["id"]):
               if opponent["group_player_ids"][0] == match["player2_id"]:
-                lazies[-1].append(opponent["name"])
+                lazies[-1].append(opponent["challonge_username"])
             lazies.append([])
             lazies[-1].append(lazies[-2][1])
             lazies[-1].append(lazies[-2][0])
       else: #playoffs
         lazies.append([])
-        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["name"])
-        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["name"])
+        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player1_id"])["challonge_username"])
+        lazies[-1].append(challonge.participants.show(tournaments[leagueid]["id"], match["player2_id"])["challonge_username"])
         lazies.append([])
         lazies[-1].append(lazies[-2][1])
         lazies[-1].append(lazies[-2][0])
@@ -58,7 +61,7 @@ def processExcuse(challonge, rounds):
   newRounds = []
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
-  cursor.execute("SELECT CHALLONGE, EXCUSED FROM EXCUSETEST WHERE CHALLONGE = %s", [challonge])
+  cursor.execute("SELECT CHALLONGE, EXCUSED FROM FINALTEST WHERE CHALLONGE = %s", [challonge])
   row = cursor.fetchone()
   if not row:
     cursor.close()
@@ -69,10 +72,12 @@ def processExcuse(challonge, rounds):
     newRounds = sorted(cmdRounds)
   else:
     newRounds = sorted((set(cmdRounds).symmetric_difference(set(dbRounds))))
-  cursor.execute("UPDATE EXCUSETEST SET EXCUSED = %s WHERE CHALLONGE = %s", (newRounds, challonge))
+  cursor.execute("UPDATE FINALTEST SET EXCUSED = %s WHERE CHALLONGE = %s", (newRounds, challonge))
   cursor.close()
   conn.commit()
   conn.close()
+  if not newRounds:
+    return -1
   return newRounds
   
 def checkExcused(round, excuses):
@@ -83,13 +88,13 @@ def checkExcused(round, excuses):
       return True
   return False
 
-def getPingMessage(discordName, round, opponent, league):
+def getPingMessage(discordName, round, opponent, league, isOpponentExcused):
   conn = conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
   cursor.execute("SELECT DEADLINE FROM DEADLINES WHERE ROUND = %s", [round])
   row = cursor.fetchone()
   deadline = row[0]
-  cursor.execute("SELECT DISCORDNAME FROM EXCUSETEST WHERE CHALLONGE = %s", [opponent])
+  cursor.execute("SELECT DISCORDNAME FROM FINALTEST WHERE CHALLONGE = %s", [opponent])
   row = cursor.fetchone()
   opponentDiscord = row[0] 
   cursor.execute("SELECT LINK, CHANNEL FROM BRACKETLINKS WHERE LEAGUE = %s", [league])
@@ -98,7 +103,20 @@ def getPingMessage(discordName, round, opponent, league):
   discordChannel = row[1]
   cursor.close()
   conn.close()
-  messageStr = f"""Ahoj {discordName}, 
+  if isOpponentExcused:
+    messageStr = f"""Ahoj {discordName},
+píšeme ti, lebo nám chýba výsledok tvojho ligového zápasu:
+KOLO: {round}.
+PROTIVNÍK: {opponent}, {opponentDiscord}
+
+Tvoj zápas sa v tomto týždni nedá odohrať.
+Tvoj protivník bol pridaný na listinu dočasne ospravedlnených hráčov -
+<#886902603479412736>.
+
+Medzičasom môžeš toto kolo preskočiť a hrať niektoré iné. Aktuálne kolo sa dohrá keď protivník bude znovu k dispozícií."""
+  
+  else:
+    messageStr = f"""Ahoj {discordName}, 
 píšeme ti, lebo nám chýba výsledok tvojho ligového zápasu:
   
 KOLO: {round}.
@@ -116,6 +134,12 @@ VÝSLEDOK SA NAHLASUJE NA DVOCH MIESTACH:
 <{bracketURL}>"""
   return messageStr
 
+def pingInputCheck(round, league):
+  if (league == 4 and (1 <= int(round) <= 11)) or (((1 <= league <= 3) or league == 5) and (1 <= int(round) <= 9)): 
+    return True
+  else:
+    return False
+
 def main():
   load_dotenv()
   intents = discord.Intents.default()
@@ -128,10 +152,10 @@ def main():
 #COMMANDS
   @bot.command()
   async def pinground(ctx, round, league):
-    if not ctx.author.guild_permissions.administrator:
+    if not (ctx.author.guild_permissions.administrator or ctx.author.id == 164698420777320448):
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
-    elif not round.isnumeric() or not league.isnumeric() or not (1 <= int(round) <= 9 ) or not (1 <= int(league) <= 5):
-      await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 a liga musí být celé číslo v intervalu 1-5 ')
+    elif not (round.isnumeric() and league.isnumeric() and pingInputCheck(int(round), int(league))):
+      await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 (1-11 pro 4. ligu) a liga musí být celé číslo v intervalu 1-5 ')
     else:
       i=0
       lazies = getDelayers(int(round), (int(league)-1))
@@ -146,6 +170,7 @@ def main():
         discordID = 0
         found = False
         excused = False
+        isOpponentExcused = False
         for row in dbRows:
           if row[0] == lazy:
             if checkExcused(round, row[2]):
@@ -154,6 +179,9 @@ def main():
               excusedList.append(lazy)
             found = True
             discordID = row[1]
+          elif row[0] == opponent:
+            if checkExcused(round, row[2]):
+              isOpponentExcused = True
         if found and not excused:
           try:
             user = await bot.fetch_user(discordID)
@@ -161,7 +189,7 @@ def main():
             notFound.append(lazy)
             continue
           try:
-            pingMessage = getPingMessage(user.name, round, opponent, league)
+            pingMessage = getPingMessage(user.name, round, opponent, league, isOpponentExcused)
             await user.send(pingMessage)
             i+=1
           except discord.Forbidden:
@@ -192,7 +220,7 @@ def main():
 
   @bot.command()
   async def excuse(ctx, *args):
-    if not ctx.author.guild_permissions.administrator:
+    if not (ctx.author.guild_permissions.administrator or ctx.author.id == 164698420777320448):
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
     else:
       if args[0] == 'list':
@@ -220,16 +248,17 @@ def main():
         for arg in args[1:]:
           if not arg.isnumeric():
             await ctx.send('Kola nebyla správně zadaná, použij !help excuse pro správnou syntax.')
-          elif arg.isnumeric() and int(arg) > 9:
-            await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 9.')
+          elif arg.isnumeric() and int(arg) > 11:
+            await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 11.')
         resultRounds = processExcuse(args[0], args[1:])
         if not resultRounds:
           await ctx.send('Nenalezl jsem hráče ' + args[0] + ' v databázi.')
+        elif resultRounds == -1:
+          await ctx.send('Nový seznam omluvených kol hráče: žádná.')
         else:
           rounds = ', '.join([str(round) for round in resultRounds])
           await ctx.send('Nový seznam omluvených kol hráče ' + args[0] + ': ' + rounds + '.')
-
-
+          
 #COG MANAGEMENT
   @bot.command()
   async def load(ctx, extension):
@@ -246,8 +275,6 @@ def main():
   
   bot.run(os.getenv("DISCORD_TOKEN"))
 
+
 if __name__ == "__main__":
     main()
-
-# IMPORTANT TO DO:  1) Help command stuff
-#                   2) Dmall rates
