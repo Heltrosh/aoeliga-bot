@@ -13,7 +13,7 @@ def getPlayers():
   i=0
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
-  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED FROM FINALTEST")
+  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED FROM PLAYERS")
   rows = cursor.fetchall()
   cursor.close()
   conn.close()
@@ -61,7 +61,7 @@ def processExcuse(challonge, rounds):
   newRounds = []
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
-  cursor.execute("SELECT CHALLONGE, EXCUSED FROM FINALTEST WHERE CHALLONGE = %s", [challonge])
+  cursor.execute("SELECT CHALLONGE, EXCUSED FROM PLAYERS WHERE CHALLONGE = %s", [challonge])
   row = cursor.fetchone()
   if not row:
     cursor.close()
@@ -72,7 +72,7 @@ def processExcuse(challonge, rounds):
     newRounds = sorted(cmdRounds)
   else:
     newRounds = sorted((set(cmdRounds).symmetric_difference(set(dbRounds))))
-  cursor.execute("UPDATE FINALTEST SET EXCUSED = %s WHERE CHALLONGE = %s", (newRounds, challonge))
+  cursor.execute("UPDATE PLAYERS SET EXCUSED = %s WHERE CHALLONGE = %s", (newRounds, challonge))
   cursor.close()
   conn.commit()
   conn.close()
@@ -94,7 +94,7 @@ def getPingMessage(discordName, round, opponent, league, isOpponentExcused):
   cursor.execute("SELECT DEADLINE FROM DEADLINES WHERE ROUND = %s", [round])
   row = cursor.fetchone()
   deadline = row[0]
-  cursor.execute("SELECT DISCORDNAME FROM FINALTEST WHERE CHALLONGE = %s", [opponent])
+  cursor.execute("SELECT DISCORDNAME FROM PLAYERS WHERE CHALLONGE = %s", [opponent])
   row = cursor.fetchone()
   opponentDiscord = "ERROR, CONTACT HELTROSH"
   if row:
