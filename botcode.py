@@ -154,7 +154,7 @@ def main():
 #COMMANDS
   @bot.command()
   async def pinground(ctx, round, league):
-    if not (ctx.author.guild_permissions.administrator or ctx.author.id == 164698420777320448):
+    if not (ctx.author.id == 687276408057233658 or ctx.author.id == 164698420777320448):
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
     elif not (round.isnumeric() and league.isnumeric() and pingInputCheck(int(round), int(league))):
       await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 (1-11 pro 4. ligu) a liga musí být celé číslo v intervalu 1-5 ')
@@ -222,7 +222,7 @@ def main():
 
   @bot.command()
   async def excuse(ctx, *args):
-    if not (ctx.author.guild_permissions.administrator or ctx.author.id == 164698420777320448):
+    if not (ctx.author.id == 687276408057233658 or ctx.author.id == 164698420777320448):
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
     else:
       if args[0] == 'list':
