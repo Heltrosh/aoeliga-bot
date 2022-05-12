@@ -233,7 +233,7 @@ def main():
         for row in dbRows:
           if row[2]:
             if leaguePrinted[row[3]] == 0:
-              excuseListOutput += (row[3] + 'liga:\n')
+              excuseListOutput += (str(row[3]) + '. liga:\n')
               leaguePrinted[row[3]] = 1
             excuseListOutput += ('CHALLONGE:' + row[0] + 'OSPRAVEDLNENÉ KOLÁ: ')
             rounds = ', '.join([str(round) for round in row[2]])
