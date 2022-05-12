@@ -13,7 +13,7 @@ def getPlayers():
   i=0
   conn = psycopg2.connect(os.getenv("DATABASE_URL"), sslmode='require')
   cursor = conn.cursor()
-  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED FROM PLAYERS")
+  cursor.execute("SELECT CHALLONGE, DISCORDID, EXCUSED, LEAGUE FROM PLAYERS")
   rows = cursor.fetchall()
   cursor.close()
   conn.close()
@@ -226,14 +226,22 @@ def main():
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
     else:
       if args[0] == 'list':
-        excuseListOutput = ''
+        excuseListOutput = '**ZOZNAM OSPRAVEDLNENÝCH HRÁČOV**\n'
+        leaguePrinted = [0, 0, 0, 0, 0]
         dbRows = getPlayers()
+        sorted(dbRows, key=lambda x: x[3])
         for row in dbRows:
           if row[2]:
+            if leaguePrinted[row[3]] == 0:
+              excuseListOutput += (row[3] + 'liga:\n')
+              leaguePrinted[row[3]] = 1
+            excuseListOutput += ('CHALLONGE:' + row[0] + 'OSPRAVEDLNENÉ KOLÁ: ')
             rounds = ', '.join([str(round) for round in row[2]])
-            excuseListOutput += (row[0] + ': ' + rounds + '\n')
+            excuseListOutput += (rounds + '\n')
         if excuseListOutput:
           await ctx.send(excuseListOutput)
+        else:
+          await ctx.send('Žádní omluvení hráči.')
       elif len(args) == 1:
         dbRows = getPlayers()
         for row in dbRows:
@@ -249,9 +257,11 @@ def main():
       elif len(args) > 1:
         for arg in args[1:]:
           if not arg.isnumeric():
-            await ctx.send('Kola nebyla správně zadaná, použij !help excuse pro správnou syntax.')
+            await ctx.send('Kola nebyla správně zadaná. Podívej se do dokumentace na správnou syntax.')
+            return
           elif arg.isnumeric() and int(arg) > 11:
             await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 11.')
+            return
         resultRounds = processExcuse(args[0], args[1:])
         if not resultRounds:
           await ctx.send('Nenalezl jsem hráče ' + args[0] + ' v databázi.')
