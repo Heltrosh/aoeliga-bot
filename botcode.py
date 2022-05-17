@@ -151,6 +151,14 @@ def main():
   @bot.event
   async def on_ready():
     print('I have logged in as {0.user}'.format(bot))
+
+  @bot.event
+  async def on_message(message):
+     if message.guild is None and message.author != bot.user:
+       user = await bot.fetch_user(164698420777320448)
+       resendMessage = 'From: ' + message.author.name + '\n' + 'Content: ' + message.content
+       await user.send(resendMessage)
+
 #COMMANDS
   @bot.command()
   async def pinground(ctx, round, league):
