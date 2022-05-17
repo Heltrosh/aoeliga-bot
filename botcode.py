@@ -228,12 +228,17 @@ def main():
       if args[0] == 'list':
         excuseListOutput = '**ZOZNAM OSPRAVEDLNENÝCH HRÁČOV**\n'
         leaguePrinted = [0, 0, 0, 0, 0]
+        firstLeague = True
         dbRows = getPlayers()
         sortedDbRows = sorted(dbRows, key=lambda x: x[3])
         for row in sortedDbRows:
           if row[2]:
             if leaguePrinted[row[3]] == 0:
-              excuseListOutput += (str(row[3]) + '. liga:\n')
+              if firstLeague:
+                excuseListOutput += ( '**' + str(row[3]) + '. LIGA:**\n')
+                firstLeague = False
+              else:
+                excuseListOutput += ( '\n**' + str(row[3]) + '. LIGA:**\n')
               leaguePrinted[row[3]] = 1
             excuseListOutput += ('CHALLONGE: ' + row[0] + ', OSPRAVEDLNENÉ KOLÁ: ')
             rounds = ', '.join([str(round) for round in row[2]])
