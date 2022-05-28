@@ -1,4 +1,5 @@
 import asyncio
+from email import message
 from json import dump
 import discord
 from discord.ext import commands
@@ -25,15 +26,13 @@ def getDelayers(round, leagueid):
   challRound = 0
   if round < 8:
     challRound = round
-  elif leagueid == 3 and round < 10:
-    challRound = round
-  elif round == 8 or round == 10:
+  elif round == 8:
     challRound = 1
   else:
     challRound = 2
   
   challonge.set_credentials("Heltrosh", os.getenv("CHALLONGE_KEY"))
-  tournaments = [challonge.tournaments.show('3deg6sfm'), challonge.tournaments.show('6svp9be5'), challonge.tournaments.show('ldc7iv9i'), challonge.tournaments.show('wgmwco9o'), challonge.tournaments.show('szwgkw9x')]
+  tournaments = [challonge.tournaments.show('3deg6sfm'), challonge.tournaments.show('6svp9be5'), challonge.tournaments.show('ldc7iv9i'), challonge.tournaments.show('wgmwco9o'), challonge.tournaments.show('szwgkw9x'), challonge.tournaments.show('9ha7dixz')]
   for match in challonge.matches.index(tournaments[leagueid]["id"]):
     if match["round"] == challRound and match["state"] == "open":
       if round < 8: #group stage
@@ -137,7 +136,7 @@ VÝSLEDOK SA NAHLASUJE NA DVOCH MIESTACH:
   return messageStr
 
 def pingInputCheck(round, league):
-  if (league == 4 and (1 <= int(round) <= 11)) or (((1 <= league <= 3) or league == 5) and (1 <= int(round) <= 9)): 
+  if ((1 <= league <= 6) and (1 <= int(round) <= 9)): 
     return True
   else:
     return False
@@ -154,10 +153,11 @@ def main():
 
   @bot.event
   async def on_message(message):
-     if message.guild is None and message.author != bot.user:
-       user = await bot.fetch_user(164698420777320448)
-       resendMessage = 'From: ' + message.author.name + '\n' + 'Content: ' + message.content
-       await user.send(resendMessage)
+    if message.guild is None and message.author != bot.user and message.author.id != 164698420777320448:
+      user = await bot.fetch_user(164698420777320448)
+      resendMessage = 'From: ' + message.author.name + '\n' + 'Content: ' + message.content
+      await user.send(resendMessage)
+    await bot.process_commands(message)
 
 #COMMANDS
   @bot.command()
@@ -165,7 +165,7 @@ def main():
     if not (ctx.author.id == 687276408057233658 or ctx.author.id == 164698420777320448):
       await ctx.send("Mě může používat jenom KapEr, co to zkoušíš!")
     elif not (round.isnumeric() and league.isnumeric() and pingInputCheck(int(round), int(league))):
-      await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 (1-11 pro 4. ligu) a liga musí být celé číslo v intervalu 1-5 ')
+      await ctx.send('Špatně zadané kolo/liga. Kolo musí být celé číslo v intervalu 1-9 a liga musí být celé číslo v intervalu 1-6.')
     else:
       i=0
       lazies = getDelayers(int(round), (int(league)-1))
@@ -271,9 +271,9 @@ def main():
         for arg in args[1:]:
           if not arg.isnumeric():
             await ctx.send('Kola nebyla správně zadaná. Podívej se do dokumentace na správnou syntax.')
-            return
-          elif arg.isnumeric() and int(arg) > 11:
-            await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 11.')
+            return  
+          elif arg.isnumeric() and int(arg) > 9:
+            await ctx.send('Některé zadané kolo bylo vyšší číslo, než je množství kol, zadej kola <= 9.')
             return
         resultRounds = processExcuse(args[0], args[1:])
         if not resultRounds:
@@ -289,15 +289,21 @@ def main():
   async def load(ctx, extension):
     if extension == 'dmall' and ctx.author.id == 164698420777320448:
       bot.load_extension(f'cogs.{extension}')
-    elif not extension == 'dmall':
+    elif extension == 'usercommands' and ctx.author.id == 164698420777320448 or ctx.author.id == 687276408057233658:
+      bot.load_extension(f'cogs.{extension}')
+    elif not extension == 'dmall' or 'usercommands':
       bot.load_extension(f'cogs.{extension}')
   @bot.command()
   async def unload(ctx, extension):
     if extension == 'dmall' and ctx.author.id == 164698420777320448:
       bot.unload_extension(f'cogs.{extension}')
-    elif not extension == 'dmall':
+    elif extension == 'usercommands' and ctx.author.id == 164698420777320448 or ctx.author.id == 687276408057233658:
+      bot.unload_extension(f'cogs.{extension}')
+    elif not extension == 'dmall' or 'usercommands':
       bot.unload_extension(f'cogs.{extension}')
   
+  
+ # bot.load_extension('cogs.usercommands')
   bot.run(os.getenv("DISCORD_TOKEN"))
 
 
