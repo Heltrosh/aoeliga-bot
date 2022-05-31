@@ -235,7 +235,7 @@ def main():
     else:
       if args[0] == 'list':
         excuseListOutput = '**ZOZNAM OSPRAVEDLNENÝCH HRÁČOV**\n'
-        leaguePrinted = [0, 0, 0, 0, 0]
+        leaguePrinted = [0, 0, 0, 0, 0, 0]
         firstLeague = True
         dbRows = getPlayers()
         sortedDbRows = sorted(dbRows, key=lambda x: x[3])
@@ -303,7 +303,7 @@ def main():
       bot.unload_extension(f'cogs.{extension}')
   
   
- # bot.load_extension('cogs.usercommands')
+  bot.load_extension('cogs.usercommands')
   bot.run(os.getenv("DISCORD_TOKEN"))
 
 
