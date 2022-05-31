@@ -303,7 +303,7 @@ def main():
       bot.unload_extension(f'cogs.{extension}')
   
   
-  bot.load_extension('cogs.usercommands')
+  #bot.load_extension('cogs.usercommands')
   bot.run(os.getenv("DISCORD_TOKEN"))
 
 
