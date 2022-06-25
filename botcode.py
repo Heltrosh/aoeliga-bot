@@ -247,7 +247,7 @@ def main():
                 firstLeague = False
               else:
                 excuseListOutput += ( '\n**' + str(row[3]) + '. LIGA:**\n')
-              leaguePrinted[row[3]] = 1
+              leaguePrinted[row[3]-1] = 1
             excuseListOutput += ('CHALLONGE: ' + row[0] + ', OSPRAVEDLNENÉ KOLÁ: ')
             rounds = ', '.join([str(round) for round in row[2]])
             excuseListOutput += (rounds + '\n')
