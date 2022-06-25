@@ -241,7 +241,7 @@ def main():
         sortedDbRows = sorted(dbRows, key=lambda x: x[3])
         for row in sortedDbRows:
           if row[2]:
-            if leaguePrinted[row[3]] == 0:
+            if leaguePrinted[row[3]-1] == 0:
               if firstLeague:
                 excuseListOutput += ( '**' + str(row[3]) + '. LIGA:**\n')
                 firstLeague = False
