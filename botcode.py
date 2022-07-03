@@ -157,8 +157,6 @@ def main():
       user = await bot.fetch_user(164698420777320448)
       resendMessage = 'From: ' + message.author.name + '\n' + 'Content: ' + message.content
       await user.send(resendMessage)
-      user = await bot.fetch_user(687276408057233658)
-      await user.send(resendMessage)
     await bot.process_commands(message)
 
 #COMMANDS
