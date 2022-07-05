@@ -1,10 +1,8 @@
-import sys
-sys.path.insert(0,'..')
-
+from ctypes.wintypes import HACCEL
 from discord.ext import commands
 
-import consts
-from functions import getPlayers, processExcuse
+from mods.consts import *
+from mods.functions import getPlayers, processExcuse
 
 class Excuse(commands.Cog):
     def __init__(self, bot):
@@ -13,8 +11,8 @@ class Excuse(commands.Cog):
     @commands.command()
     async def excuse(self, ctx, *args):
        # Used for excusing players so they don't get message telling them to play their match when they excused themselves
-        if not (ctx.author.id == consts.KAPER_DISCORD_ID or ctx.author.id == consts.HELTROSH_DISCORD_ID):
-            await ctx.send(consts.ADMIN_ONLY_ERROR)
+        if not (ctx.author.id == KAPER_DISCORD_ID or ctx.author.id == HELTROSH_DISCORD_ID):
+            await ctx.send(ADMIN_ONLY_ERROR)
             return       
         if args[0] == "list":
             excuseListOutput = "**ZOZNAM OSPRAVEDLNENÝCH HRÁČOV**\n"

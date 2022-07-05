@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv.main import load_dotenv
 
-import consts
+from mods.consts import *
 
 def main():
     load_dotenv()
@@ -19,8 +19,8 @@ def main():
     @bot.event
     async def on_message(message): 
         # Currently used to resend DMs sent to the bot to me
-        if message.guild is None and message.author != bot.user and message.author.id != consts.HELTROSH_DISCORD_ID:
-            user = await bot.fetch_user(consts.HELTROSH_DISCORD_ID)
+        if message.guild is None and message.author != bot.user and message.author.id != HELTROSH_DISCORD_ID:
+            user = await bot.fetch_user(HELTROSH_DISCORD_ID)
             resendMessage = "From: " + message.author.name + "\n" + "Content: " + message.content
             await user.send(resendMessage)
         await bot.process_commands(message)
@@ -28,15 +28,15 @@ def main():
 #COG MANAGEMENT
     @bot.command()
     async def load(ctx, extension):
-        if extension == "dmall" and ctx.author.id == consts.HELTROSH_DISCORD_ID:
+        if extension == "dmall" and ctx.author.id == HELTROSH_DISCORD_ID:
             bot.load_extension(f"cogs.{extension}")
     @bot.command()
     async def unload(ctx, extension):
-        if extension == "dmall" and ctx.author.id == consts.HELTROSH_DISCORD_ID:
+        if extension == "dmall" and ctx.author.id == HELTROSH_DISCORD_ID:
             bot.unload_extension(f"cogs.{extension}")
      
-    bot.load_extension("cogs.pinground")
-    bot.load_extension("cogs.excuse")
+    bot.load_extension("mods.cogs.pinground")
+    bot.load_extension("mods.cogs.excuse")
     bot.run(os.getenv("DISCORD_TOKEN"))
 
 

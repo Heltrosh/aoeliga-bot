@@ -1,12 +1,8 @@
-import sys
-sys.path.insert(0,'..')
-
-
 import discord
 from discord.ext import commands
 
-import consts
-from functions import getPlayers, getDelayers, getPingMessage, pingInputCheck
+from mods.consts import *
+from mods.functions import getPlayers, getDelayers, getPingMessage
 
 class PingRound(commands.Cog):
     def __init__(self, bot):
@@ -15,11 +11,11 @@ class PingRound(commands.Cog):
     @commands.command()
     async def pinground(self, ctx, round, league):
         # The main command of the bot - sends DMs to players with unreported results
-        if not (ctx.author.id == consts.KAPER_DISCORD_ID or ctx.author.id == consts.HELTROSH_DISCORD_ID):
-            await ctx.send(consts.ADMIN_ONLY_ERROR)
+        if not (ctx.author.id == KAPER_DISCORD_ID or ctx.author.id == HELTROSH_DISCORD_ID):
+            await ctx.send(ADMIN_ONLY_ERROR)
             return
         elif not (round.isnumeric() and league.isnumeric() and (1 <= league <= 6) and (1 <= round <= 9)):
-            await ctx.send(consts.WRONG_ROUND_OR_LEAGUE)
+            await ctx.send(WRONG_ROUND_OR_LEAGUE)
             return
         i=0
         lazies = getDelayers(int(round), (int(league)-1))

@@ -2,7 +2,8 @@ import os
 
 import psycopg2
 import challonge
-import consts
+
+from mods.consts import *
 
 
 def getPlayers(): 
@@ -73,10 +74,10 @@ def getPingMessage(discordName, round, opponent, league, isOpponentExcused):
     cursor.close()
     conn.close()
     if isOpponentExcused:
-        messageStr = consts.EXCUSED_PING_DM.format(discordName = discordName, round = round, opponent = opponent, 
+        messageStr = EXCUSED_PING_DM.format(discordName = discordName, round = round, opponent = opponent, 
                                                   opponentDiscord = opponentDiscord)
     else:
-        messageStr = consts.NORMAL_PING_DM.format(discordName = discordName, round = round, opponent = opponent, 
+        messageStr = NORMAL_PING_DM.format(discordName = discordName, round = round, opponent = opponent, 
                                                   opponentDiscord = opponentDiscord, deadline = deadline,
                                                   discordChannel = discordChannel, bracketURL = bracketURL)
     return messageStr
