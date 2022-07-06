@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv.main import load_dotenv
 
-from mods.consts import *
+from modules.consts import *
 
 def main():
     load_dotenv()
@@ -35,8 +35,8 @@ def main():
         if extension == "dmall" and ctx.author.id == HELTROSH_DISCORD_ID:
             bot.unload_extension(f"cogs.{extension}")
      
-    bot.load_extension("mods.cogs.pinground")
-    bot.load_extension("mods.cogs.excuse")
+    bot.load_extension("modules.cogs.pinground")
+    bot.load_extension("modules.cogs.excuse")
     bot.run(os.getenv("DISCORD_TOKEN"))
 
 
