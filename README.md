@@ -10,7 +10,7 @@ Shows either the default help message or a syntax of the specified command.
 #### !pinground
 Syntax: !pinground \<round\> \<league\>
 
-Sends a DM to everyone inside a league, who didn't submit a result for that specific round. Semifinals are coded as round 8 and finals as round 9 (10 & 11 for league 4).
+Sends a DM to everyone inside a league, who didn't submit a result for that specific round. Semifinals are coded as round 8 and finals as round 9.
 
 #### !excuse
 Syntax: !excuse list OR !excuse \<challongename\> OR !excuse \<challongename\> \<round(s)\>
