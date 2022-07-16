@@ -33,14 +33,14 @@ class PingRound(commands.Cog):
             isOpponentExcused = False
             for player in players:
                 if player[0] == lazy:
-                    if player[2] and round in player[2]:
+                    if player[2] and (int(round) in player[2]):
                         excused = True
                         excusedAmount += 1
                         excusedList.append(lazy)
                     found = True
                     discordID = player[1]
                 elif player[0] == opponent:
-                    if player[2] and round in player[2]:
+                    if player[2] and (int(round) in player[2]):
                         isOpponentExcused = True
             if found and not excused:
                 try:
