@@ -100,6 +100,7 @@ def excuseList():
                 leagueHeaderPrinted[player[3]-1] = 1
             rounds = ", ".join([str(round) for round in player[2]])
             excuseListOutput += (f"CHALLONGE: {player[0]}, OSPRAVEDLNENÉ KOLÁ: {rounds}\n".replace("_", "\_"))
+    return excuseListOutput
 
 def excusePlayer(challonge, rounds): 
     # Logic for excusing players, returns list of excused rounds
